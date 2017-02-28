@@ -30,7 +30,7 @@ module.exports = class Account {
      */
     if (this._lastTweet === null) return;
     this._isDown = true;
-    sendAlert(this._lastTweet);
+    sendAlert(this.toJSON());
     this._alertReminder = setInterval(() => {
       sendAlert(this.toJSON());
     }, this._alertIntervalMS);

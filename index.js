@@ -15,7 +15,7 @@ const stream = createListener(streamAccountName);
 watchStream(stream);
 
 app.get('/keep-alive', (req, res) => res.json({ status: 'awake' }));
-app.get('/status', (req, res) => res.json(db.getAllAsJSON()));
+app.get('/status', (req, res) => res.json(db.accounts.getAllAsJSON()));
 
 app.listen(PORT, (err) => {
   if (err) logger.error(err);

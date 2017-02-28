@@ -6,10 +6,11 @@ const HOUR = 1000 * 60;
 const HALF_HOUR = HOUR / 2
 
 module.exports = class Account {
-  constructor({ accountName, timeoutMS = HALF_HOUR, alertIntervalMS = HOUR }) {
+  constructor({ accountName, timeoutMS = HALF_HOUR, alertIntervalMS = HOUR, alertMention }) {
     this._accountName = accountName;
     this._timeoutMS = timeoutMS;
     this._alertIntervalMS = alertIntervalMS;
+    this._alertMention = alertMention;
     this._lastTweet = null;
     this._timeout = null;
     this._alertReminder = null;
@@ -30,7 +31,7 @@ module.exports = class Account {
      */
     if (this._lastTweet === null) return;
     this._isDown = true;
-    sendAlert(this.toJSON());
+    sendAlert(this.toJSON(), true);
     this._alertReminder = setInterval(() => {
       sendAlert(this.toJSON());
     }, this._alertIntervalMS);
@@ -49,6 +50,7 @@ module.exports = class Account {
       accountName: this._accountName,
       lastTweet: this._lastTweet,
       alertIntervalMS: this._alertIntervalMS,
+      alertMention: this._alertMention,
       timeoutMS: this._timeoutMS,
     };
   }

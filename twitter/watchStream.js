@@ -10,7 +10,7 @@ module.exports = (stream) => {
           logger.info(`VerifiedTweet[${tweet.accountName}]: ${tweet.text}`);
           const { accountName } = tweet;
           db.accounts
-            .getOrCreate(accountName)
+            .getByAccountName(accountName)
             .then((account) => account.didTweet(tweet))
             .catch(err => logger.error(err));
         }

@@ -1,28 +1,25 @@
 const _ = require('lodash');
 const logger = require('../logging');
-const accountConfig = require('../config');
 const Account = require('./models/Account');
 const data = {};
 
 module.exports = {
   accounts: {
-    getOrCreate: (accountName) => {
+    create: ({ accountName, alertMention, timeoutMS, alertIntervalMS }) => {
+      const normalizedAccountName = accountName.toLowerCase();
+      data[normalizedAccountName] = new Account({
+        accountName,
+        alertMention,
+        timeoutMS,
+        alertIntervalMS
+      });
+      return data[normalizedAccountName];
+    },
+    getByAccountName: (accountName) => {
       return new Promise((resolve, reject) => {
+        const normalizedAccountName = accountName.toLowerCase();
         try {
-          if (!(accountName in data)) {
-            /*
-             * This is awfully naive to think we're going to find it,
-             * though by this point, it is a watched account so we should
-             * be able to find it. Let's go ahead and move along...
-             */
-            const { timeoutMS, alertIntervalMS } = _.find(accountConfig, { accountName });
-            data[accountName] = new Account({ accountName, timeoutMS, alertIntervalMS });
-          }
-          /*
-           * Either we just created it, or it existed, but we
-           * go ahead and resolve the promise with the account.
-           */
-          resolve(data[accountName]);
+          resolve(data[normalizedAccountName]);
         } catch (e) {
           reject(e)
         }

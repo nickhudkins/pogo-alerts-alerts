@@ -7,7 +7,7 @@ const doPost = (payload) => {
     request.post(process.env.WEBHOOK_URL || 'http://requestb.in/xxch05xx', {
 		json: {
 			username: 'Twitter Listener',
-			content: `**${payload.accountName}** appears to be down. The last tweet was ${moment(payload.lastTweet.createdAt).fromNow()}. Check on it ASAP!`
+			content: `@everyone **${payload.accountName}** appears to be down. The last tweet was ${moment(payload.lastTweet.createdAt).fromNow()}. Check on it ASAP!`
 		}			
     }, (err, resp) => {
       if (err) reject(err);

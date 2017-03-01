@@ -6,21 +6,22 @@ const data = {};
 
 module.exports = {
   accounts: {
+    init:  () => {
+        logger.info(`Initializing ${accountConfig.length} accounts...`);
+        /*
+         * Grab all accounts from config and place in data array
+         * for later use.
+         */
+        _.each(accountConfig, (account, key) => {
+            const { accountName, timeoutMS, alertIntervalMS } = account;
+            data[accountName] = new Account({ accountName, timeoutMS, alertIntervalMS });
+        });
+    },
     getOrCreate: (accountName) => {
       return new Promise((resolve, reject) => {
         try {
-          if (!(accountName in data)) {
-            /*
-             * This is awfully naive to think we're going to find it,
-             * though by this point, it is a watched account so we should
-             * be able to find it. Let's go ahead and move along...
-             */
-            const { timeoutMS, alertIntervalMS } = _.find(accountConfig, { accountName });
-            data[accountName] = new Account({ accountName, timeoutMS, alertIntervalMS });
-          }
           /*
-           * Either we just created it, or it existed, but we
-           * go ahead and resolve the promise with the account.
+           * Go ahead and resolve the promise with the account.
            */
           resolve(data[accountName]);
         } catch (e) {

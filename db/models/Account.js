@@ -14,6 +14,8 @@ module.exports = class Account {
     this._timeout = null;
     this._alertReminder = null;
     this._isDown = false;
+
+    this._beginTimeout();
   }
 
   _beginTimeout() {
@@ -25,10 +27,6 @@ module.exports = class Account {
   }
 
   _alertAccountDown() {
-    /* We have yet to see a tweet so we have
-     * no idea if it is actually down.
-     */
-    if (this._lastTweet === null) return;
     this._isDown = true;
     sendAlert(this.toJSON());
     this._alertReminder = setInterval(() => {
@@ -40,7 +38,6 @@ module.exports = class Account {
     this._lastTweet = tweet;
     this._isDown = false;
     logger.info(`DidTweet[${tweet.accountName}]: ${tweet.createdAt}`);
-    this._beginTimeout();
   }
 
   toJSON() {

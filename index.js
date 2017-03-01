@@ -10,6 +10,8 @@ const watchStream = require('./twitter/watchStream');
 const app = express();
 app.use(bodyParser.json());
 
+db.accounts.init();
+
 const streamAccountName = process.env.STREAM_USER || 'pganalert';
 const stream = createListener(streamAccountName);
 watchStream(stream);

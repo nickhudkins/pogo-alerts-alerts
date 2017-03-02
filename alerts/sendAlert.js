@@ -2,23 +2,42 @@ const logger = require('../logging');
 const request = require('request');
 const moment = require('moment');
 
-const doPost = (payload) => {
-  return new Promise((resolve, reject) => {
-	const lastTweetText = 'never found';
-	if (payload.lastTweet) {
-		lastTweetText = moment(payload.lastTweet.createdAt).fromNow();
-	}
-	  
-    request.post(process.env.WEBHOOK_URL || 'http://requestb.in/xxch05xx', {
-		json: {
-			username: 'Twitter Listener',
-			content: `@everyone **${payload.accountName}** appears to be down. The last tweet was ${lastTweetText}. Check on it ASAP!`
-		}			
-    }, (err, resp) => {
-      if (err) reject(err);
-      resolve();
-    });
+const maximumRetries = 20
+const retryDelay = 10000
+
+const startPost = (payload) => {
+  payload.attempt = 0; // Initialize attempt counter
+  return new Promise((resolve, reject) => {  
+    doPost(payload, resolve, reject);
   })
+}
+
+const doPost = (payload, resolve, reject) => {  
+  if (payload.attempt < maximumRetries) {
+    const message = process.env.WEBHOOK_MESSAGE || `**${payload.accountName}** appears to be down. The last check was ${moment(payload.lastCheck).fromNow()}.`;    
+    request.post(process.env.WEBHOOK_URL || 'http://requestb.in/xxch05xx', {
+      json: {
+        username: 'PGAN Twitter Listener',
+        content: message
+      }      
+    }, (err, resp, body) => {
+      /*
+	   * Check for success messages. If unsuccessful try again a little later.
+	   */
+      if (resp.statusCode != 200 && resp.statusCode != 204) {
+        setTimeout(() => {
+          payload.attempt++;
+          doPost(payload, resolve, reject);
+        }, retryDelay);
+      }
+      else {  
+        resolve();
+      }
+    });
+  }
+  else {
+    reject('Exceeded the maximum amount of retries for **${payload.accountName}**. Alert could not be sent.');
+  }
 }
 
 module.exports = (account) => {
@@ -26,5 +45,5 @@ module.exports = (account) => {
   logger.info('======================================');
   logger.info(`${accountName}, appears to be down.`);
   logger.info('======================================\n\n');
-  doPost(account);
+  startPost(account);
 }

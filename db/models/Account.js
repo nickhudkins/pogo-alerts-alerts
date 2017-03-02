@@ -14,6 +14,7 @@ module.exports = class Account {
     this._timeout = null;
     this._alertReminder = null;
     this._isDown = false;
+	this._lastCheck = moment();
 
     this._beginTimeout();
   }
@@ -36,6 +37,7 @@ module.exports = class Account {
 
   didTweet(tweet) {
     this._lastTweet = tweet;
+	this._lastCheck = moment(tweet.createdAt);
     this._isDown = false;
     logger.info(`DidTweet[${tweet.accountName}]: ${tweet.createdAt}`);
   }
@@ -47,6 +49,7 @@ module.exports = class Account {
       lastTweet: this._lastTweet,
       alertIntervalMS: this._alertIntervalMS,
       timeoutMS: this._timeoutMS,
+	  lastCheck: this._lastCheck.toDate()
     };
   }
 }

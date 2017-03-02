@@ -40,6 +40,7 @@ module.exports = class Account {
 	this._lastCheck = moment(tweet.createdAt).toDate();
     this._isDown = false;
     logger.info(`DidTweet[${tweet.accountName}]: ${tweet.createdAt}`);
+    this._beginTimeout();
   }
 
   toJSON() {

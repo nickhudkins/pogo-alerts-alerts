@@ -27,7 +27,9 @@ module.exports = () => {
               limit: 100
             }, (err, rows) => {
               if (err) reject(err);
-              const accountConfig = rows.map(({ twitterurl , timeout = 1 * HOURS , alertinterval = .25 * MINUTES , arearep }) => {
+			  const timeoutSetting = process.env.TIMEOUT || 1 * HOURS;
+			  const alertintervalSetting = process.env.ALERT_INTERVAL || .25 * MINUTES;
+              const accountConfig = rows.map(({ twitterurl , timeout = timeoutSetting , alertinterval = alertintervalSetting , arearep }) => {
                   const accountName = twitterurl.replace('https://twitter.com/', '');
                   return {
                     accountName,

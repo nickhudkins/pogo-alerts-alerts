@@ -14,7 +14,9 @@ const startPost = (payload) => {
 
 const doPost = (payload, resolve, reject) => {
   if (payload.attempt < maximumRetries) {
-    const message = process.env.WEBHOOK_MESSAGE || `**${payload.accountName}** appears to be down. The last tweet was ${moment.utc(payload.lastTweet.createdAt, 'ddd MMM DD HH:mm:ss:SS Z YYYY').fromNow()}.  * Test`;
+    const message = process.env.WEBHOOK_MESSAGE || `**${payload.accountName}** appears to be down. The last tweet was ${moment.utc(payload.lastTweet.createdAt, 'ddd MMM DD HH:mm:ss:SS Z YYYY').fromNow()}.
+	
+	* Test`;
     console.log(message);
     request.post(process.env.WEBHOOK_URL || 'http://requestb.in/xxch05xx', {
       json: {

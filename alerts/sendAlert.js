@@ -19,7 +19,7 @@ const doPost = (payload, resolve, reject) => {
 * <${payload.alertMention}>:
 	* The twitter account may be locked. Please check when you get a chance.
 	* If the twitter account isn't locked, please check the map to see if anything is showing.
-* <@HokiePokeDad#6906>:
+* <@6906>:
 	* Check the scan instances if they failed
 ----------------------------------
 

@@ -30,7 +30,15 @@ module.exports = {
        * We don't care about all of the private properties
        * of our accounts, so we'll return their `toJSON` values.
        */
-      return _.mapValues(data, (value) => value.toJSON());
+      return _.mapValues(data, (value) => {
+        const v = value.toJSON();
+        return {
+          lastTweet: v.lastTweet.text,
+          timeUntilDown: v.timeUntilDown,
+          isDown: v.isDown,
+          link: `https://twitter.com/${v.accountName}`,
+        }
+      });
     }
   },
 }

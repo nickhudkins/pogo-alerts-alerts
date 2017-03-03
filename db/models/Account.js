@@ -16,6 +16,8 @@ module.exports = class Account {
     this._timeout = null;
     this._alertReminder = null;
     this._isDown = false;
+    this._timeUntilDown = timeoutMS;
+    this._tick = null;
     this._beginTimeout();
   }
 
@@ -25,10 +27,17 @@ module.exports = class Account {
     this._timeout = setTimeout(() => {
       this._alertAccountDown()
     }, this._timeoutMS);
+    clearInterval(this._tick);
+    this._tick = setInterval(() => {
+      if (!this._isDown) {
+        this._timeUntilDown -= 1000;
+      }
+    }, 1000);
   }
 
   _alertAccountDown() {
     this._isDown = true;
+    clearInterval(this._tick);
     sendAlert(this.toJSON(), true);
     this._alertReminder = setInterval(() => {
       sendAlert(this.toJSON());
@@ -38,11 +47,14 @@ module.exports = class Account {
   didTweet(tweet) {
     this._lastTweet = tweet;
     this._isDown = false;
-    logger.info(`DidTweet[${tweet.accountName}]: ${tweet.createdAt}`);
+    this._timeUntilDown = this._timeoutMS;
+    logger.info(`DidTweet[${tweet.accountName}]`);
     this._beginTimeout();
   }
 
   toJSON() {
+    const minutes = Math.floor(this._timeUntilDown / 1000 / 60);
+    const seconds = ((this._timeUntilDown / 1000) % 60)
     return {
       isDown: this._isDown,
       accountName: this._accountName,
@@ -50,6 +62,7 @@ module.exports = class Account {
       alertIntervalMS: this._alertIntervalMS,
       alertMention: this._alertMention,
       timeoutMS: this._timeoutMS,
+      timeUntilDown: `${minutes}m ${seconds}s`,
 	    lastCheck: this._lastCheck
     };
   }

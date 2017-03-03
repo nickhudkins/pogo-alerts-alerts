@@ -7,7 +7,6 @@ module.exports = (stream) => {
     verifyTweet(tweet)
       .then((tweet) => {
         if (tweet) {
-          logger.info(`VerifiedTweet[${tweet.accountName}]: ${tweet.text}`);
           const { accountName } = tweet;
           db.accounts
             .getByAccountName(accountName)

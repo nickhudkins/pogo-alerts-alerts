@@ -1,4 +1,4 @@
-const logging = require('../logging');
+const logger = require('../logging');
 const request = require('request');
 const moment = require('moment');
 

@@ -2,27 +2,48 @@ const logger = require('../logging');
 const request = require('request');
 const moment = require('moment');
 
-const doPost = (payload, shouldMention) => {
+const maximumRetries = 20
+const retryDelay = 10000
+
+const startPost = (payload) => {
+  payload.attempt = 0; // Initialize attempt counter
   return new Promise((resolve, reject) => {
-    const mention = shouldMention ? 'Hey @' + payload.alertMention + ', ' : 'Hey, ';
-    request.post(process.env.WEBHOOK_URL || 'http://requestb.in/1l6vfjn1', {
-      json: {
-        username: 'Twitter Listener',
-        content: `${mention}**${payload.accountName}** has been down for over an hour. The last tweet was ${moment.utc(payload.lastTweet.createdAt, 'ddd MMM DD HH:mm:ss:SS Z YYYY').fromNow()}. Check on it ASAP!`
-      }
-    }, (err, resp) => {
-      if (err) reject(err);
-      resolve();
-    });
+    doPost(payload, resolve, reject);
   })
 }
 
-module.exports = (account, shouldMention = false) => {
+const doPost = (payload, resolve, reject) => {
+  if (payload.attempt < maximumRetries) {
+    const message = process.env.WEBHOOK_MESSAGE || `**${payload.accountName}** appears to be down. The last check was ${moment(payload.lastCheck).fromNow()}.`;
+    request.post(process.env.WEBHOOK_URL || 'http://requestb.in/xxch05xx', {
+      json: {
+        username: 'PGAN Twitter Listener',
+        content: message
+      }
+    }, (err, resp, body) => {
+      /*
+	   * Check for success messages. If unsuccessful try again a little later.
+	   */
+      if (resp.statusCode != 200 && resp.statusCode != 204) {
+        setTimeout(() => {
+          payload.attempt++;
+          doPost(payload, resolve, reject);
+        }, retryDelay);
+      }
+      else {
+        resolve();
+      }
+    });
+  }
+  else {
+    reject('Exceeded the maximum amount of retries for **${payload.accountName}**. Alert could not be sent.');
+  }
+}
+
+module.exports = (account) => {
   const { accountName } = account;
   logger.info('======================================');
   logger.info(`${accountName}, appears to be down.`);
-  logger.info('======================================');
-  logger.info('');
-  logger.info('');
-  doPost(account, shouldMention);
+  logger.info('======================================\n\n');
+  startPost(account);
 }

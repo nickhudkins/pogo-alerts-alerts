@@ -25,7 +25,7 @@ getConfig().then(accountConfig => {
 
   const stream = createListener(streamAccountName);
   watchStream(stream);
-})
+}).catch(e => console.log(e))
 
 app.get('/keep-alive', (req, res) => res.json({ status: 'awake' }));
 app.get('/status', (req, res) => res.json(db.accounts.getAllAsJSON()));

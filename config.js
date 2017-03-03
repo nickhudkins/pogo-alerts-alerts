@@ -13,7 +13,14 @@ module.exports = () => {
       const doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_KEY)
       const creds = {
         client_email: process.env.GOOGLE_SERVICE_EMAIL,
-        private_key: process.env.GOOGLE_DRIVE_API_PRIVATE_KEY
+        private_key: process.env.GOOGLE_DRIVE_API_PRIVATE_KEY,
+      }
+      if (!creds.private_key) {
+        try {
+          creds.private_key = require('./google.private.json').private_key
+        } catch (e) {
+            throw new Error('CREDENTIALS_COULD_NOT_BE_SET');
+        }
       }
       doc.useServiceAccountAuth(creds, () => {
         doc.getInfo((err, info) => {

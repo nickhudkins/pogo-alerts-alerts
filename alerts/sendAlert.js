@@ -15,12 +15,14 @@ const startPost = (payload) => {
 const doPost = (payload, resolve, reject) => {
   if (payload.attempt < maximumRetries) {
     const message = process.env.WEBHOOK_MESSAGE || `
+
 **${payload.accountName}** appears to be down. The last tweet was ${moment.utc(payload.lastTweet.createdAt, 'ddd MMM DD HH:mm:ss:SS Z YYYY').fromNow()}.
 * ${payload.alertMention} :
 	* The twitter account may be locked. Please check when you get a chance.
 	* If the twitter account isn't locked, please check the map to see if anything is showing.
 * @HokiePokeDad#6906 :
 	* Check the scan instances if they failed
+
 `;
     console.log(message);
     request.post(process.env.WEBHOOK_URL || 'http://requestb.in/xxch05xx', {

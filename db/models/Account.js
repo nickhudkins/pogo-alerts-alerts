@@ -2,19 +2,21 @@ const logger = require('../../logging');
 const moment = require('moment');
 const sendAlert = require('../../alerts/sendAlert');
 
-const HOUR = 1000 * 60;
-const HALF_HOUR = HOUR / 2
-
 module.exports = class Account {
-  constructor({ accountName, timeoutMS = HALF_HOUR, alertIntervalMS = HOUR, alertMention }) {
+  constructor({ accountName, timeoutMS, alertIntervalMS, alertMention }) {
     this._accountName = accountName;
     this._timeoutMS = timeoutMS;
     this._alertIntervalMS = alertIntervalMS;
     this._alertMention = alertMention;
-    this._lastTweet = 'RECENTLY:BEGAN:LISTENING';
+    this._lastTweet = {
+      accountName,
+      createdAt: moment().format('ddd MMM DD HH:mm:ss:SS Z YYYY'),
+      text: 'FAKE_TWEET'
+    };
     this._timeout = null;
     this._alertReminder = null;
     this._isDown = false;
+    this._beginTimeout();
   }
 
   _beginTimeout() {
@@ -26,10 +28,6 @@ module.exports = class Account {
   }
 
   _alertAccountDown() {
-    /* We have yet to see a tweet so we have
-     * no idea if it is actually down.
-     */
-    if (this._lastTweet === null) return;
     this._isDown = true;
     sendAlert(this.toJSON(), true);
     this._alertReminder = setInterval(() => {
@@ -52,6 +50,7 @@ module.exports = class Account {
       alertIntervalMS: this._alertIntervalMS,
       alertMention: this._alertMention,
       timeoutMS: this._timeoutMS,
+	    lastCheck: this._lastCheck
     };
   }
 }

@@ -1,12 +1,7 @@
 const MINUTES = 1000 * 60;
 const HOURS = 60 * MINUTES;
 const GoogleSpreadsheet = require('google-spreadsheet');
-/*
- * We make sure that whatever is entered is transformed
- * to lowercase so that we can predictably find things
- * without needing IDs, since the accountName will function
- * as such here.
- */
+
 module.exports = () => {
   return new Promise((resolve, reject) => {
     try {

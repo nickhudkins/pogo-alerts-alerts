@@ -1,6 +1,5 @@
 const logger = require('../../logging');
 const moment = require('moment');
-const sendAlert = require('../../alerts/sendAlert');
 
 module.exports = class Account {
   constructor({ accountName, timeoutMS, alertIntervalMS, alertMention }) {
@@ -23,9 +22,10 @@ module.exports = class Account {
 
   _beginTimeout() {
     clearTimeout(this._timeout);
-    clearInterval(this._alertReminder);
     this._timeout = setTimeout(() => {
-      this._alertAccountDown()
+      // If we hit the timeout, we alert, and
+      // do mention the area rep.
+      this._alertAccountDown(true)
     }, this._timeoutMS);
     clearInterval(this._tick);
     this._tick = setInterval(() => {
@@ -35,20 +35,18 @@ module.exports = class Account {
     }, 1000);
   }
 
-  _alertAccountDown() {
+  _alertAccountDown(shouldMention = false) {
     this._isDown = true;
     clearInterval(this._tick);
-    sendAlert(this.toJSON(), true);
-    this._alertReminder = setInterval(() => {
-      sendAlert(this.toJSON());
-    }, this._alertIntervalMS);
   }
 
   didTweet(tweet) {
     this._lastTweet = tweet;
+    if (this._isDown) {
+      logger.info(`[${this._accountName}] Coming Back Up!`);
+    }
     this._isDown = false;
     this._timeUntilDown = this._timeoutMS;
-    logger.info(`DidTweet[${tweet.accountName}]`);
     this._beginTimeout();
   }
 

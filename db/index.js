@@ -25,6 +25,9 @@ module.exports = {
         }
       });
     },
+    getAll: () => {
+      return data;
+    },
     getAllAsJSON: () => {
       /*
        * We don't care about all of the private properties

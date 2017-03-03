@@ -7,11 +7,31 @@ const db = require('./db');
 const getConfig = require('./config');
 const createListener = require('./twitter/createListener');
 const watchStream = require('./twitter/watchStream');
+const sendDownAccountSummary = require('./alerts/sendAccountSummary');
 
 const app = express();
 app.use(bodyParser.json());
 
 const streamAccountName = process.env.STREAM_USER || 'pganalert';
+
+const checkAccounts = () => {
+  const accountsList = Object.values(db.accounts.getAll());
+  const downAccounts = accountsList.filter((account) => {
+    return account._isDown;
+  });
+  if (downAccounts.length > 0) {
+    sendDownAccountSummary(downAccounts)
+      .then(() => {
+        setTimeout(() => {
+          checkAccounts();
+        }, 10000);
+      })
+  } else {
+    setTimeout(() => {
+      checkAccounts();
+    }, 1000)
+  }
+}
 
 getConfig().then(accountConfig => {
   /*
@@ -25,6 +45,8 @@ getConfig().then(accountConfig => {
 
   const stream = createListener(streamAccountName);
   watchStream(stream);
+  checkAccounts();
+
 }).catch(e => console.log(e))
 
 app.get('/keep-alive', (req, res) => res.json({ status: 'awake' }));

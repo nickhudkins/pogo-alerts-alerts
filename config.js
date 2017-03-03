@@ -24,8 +24,9 @@ module.exports = () => {
             const [ sheet ] = info.worksheets;
             sheet.getRows({
               offset: 1,
-              limit: 100
+              limit: 1000
             }, (err, rows) => {
+              // rows = rows.filter(({ twitterurl }) => twitterurl.replace('https://twitter.com/', '').toLowerCase() === 'pganmdbmorecity');
               if (err) reject(err);
 			  const timeoutSetting = process.env.TIMEOUT || 1 * HOURS;
 			  const alertintervalSetting = process.env.ALERT_INTERVAL || .25 * MINUTES;

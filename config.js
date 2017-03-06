@@ -30,13 +30,13 @@ module.exports = () => {
               if (err) reject(err);
 			  const timeoutSetting = process.env.TIMEOUT || 1 * HOURS;
 			  const alertintervalSetting = process.env.ALERT_INTERVAL || .25 * MINUTES;
-              const accountConfig = rows.map(({ twitterurl , timeout = timeoutSetting , alertinterval = alertintervalSetting , arearep }) => {
+              const accountConfig = rows.map(({ discordmentionid, twitterurl , timeout = timeoutSetting , alertinterval = alertintervalSetting , arearep }) => {
                   const accountName = twitterurl.replace('https://twitter.com/', '');
                   return {
                     accountName,
                     timeoutMS: parseInt(timeout, 10),
                     alertIntervalMS: parseInt(alertinterval, 10),
-                    alertMention: arearep,
+                    alertMention: discordmentionid,
                   };
               });
               resolve(accountConfig);

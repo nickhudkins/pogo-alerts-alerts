@@ -6,10 +6,10 @@ const moment = require('moment');
 const sendAlert = (payload) => {
   const message = process.env.WEBHOOK_MESSAGE || `
   **${payload._accountName}** appears to be down. The last tweet was ${moment.utc(payload._lastTweet.createdAt, 'ddd MMM DD HH:mm:ss:SS Z YYYY').fromNow()}.
-  * <${payload._alertMention}> :
+  * ${payload._alertMention} :
     * The twitter account may be locked. Please check when you get a chance.
     * If the twitter account isn't locked, please check the map to see if anything is showing.
-  * <@HokiePokeDad#6906> :
+  * <@!231013798494994432> :
     * Check the scan instances if they failed
   ----------------------------------
   `;
@@ -21,10 +21,11 @@ const sendAlert = (payload) => {
       }
     }, (err, resp, body) => {
       if (err) reject(err);
-      if ( resp.statusCode === 200 || resp.statusCode === 429) {
-        if (resp.body.retry_after) resolve({ nextRequestDelay: resp.body.retry_after, limited: true });
+      if ( resp.statusCode === 200 || resp.statusCode === 204 || resp.statusCode === 429) {
+        if (resp.body && resp.body.retry_after) resolve({ nextRequestDelay: resp.body.retry_after, limited: true });
         resolve({ nextRequestDelay: 1000, limited: false });
       } else {
+        logger.info('WHAT', resp.statusCode, resp.body);
         reject(new Error('UNKNOWN_ERROR'));
       }
 

@@ -13,6 +13,7 @@ const sendAlert = (payload) => {
     * Check the scan instances if they failed
   ----------------------------------
   `;
+  logger.info(message);
   return new Promise((resolve, reject) => {
     request.post(process.env.WEBHOOK_URL || 'http://requestb.in/1k7k8pf1', {
       json: {

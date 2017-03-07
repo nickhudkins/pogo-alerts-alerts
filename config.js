@@ -21,25 +21,34 @@ module.exports = () => {
         doc.getInfo((err, info) => {
           if (err) reject(err);
           if (!err) {
-            const [ sheet ] = info.worksheets;
+            const [ sheet ] = info.worksheets.filter(({ title }) => title === 'Master');
+            const [ areaReps ] = info.worksheets.filter(({ title }) => title === 'AreaReps');
             sheet.getRows({
               offset: 1,
               limit: 1000
             }, (err, rows) => {
-              // rows = rows.filter(({ twitterurl }) => twitterurl.replace('https://twitter.com/', '').toLowerCase() === 'pganmdbmorecity');
               if (err) reject(err);
-			  const timeoutSetting = process.env.TIMEOUT || 1 * HOURS;
-			  const alertintervalSetting = process.env.ALERT_INTERVAL || .25 * MINUTES;
-              const accountConfig = rows.map(({ discordmentionid, twitterurl , timeout = timeoutSetting , alertinterval = alertintervalSetting , arearep }) => {
-                  const accountName = twitterurl.replace('https://twitter.com/', '');
-                  return {
-                    accountName,
-                    timeoutMS: parseInt(timeout, 10),
-                    alertIntervalMS: parseInt(alertinterval, 10),
-                    alertMention: discordmentionid,
-                  };
-              });
-              resolve(accountConfig);
+			        const timeoutSetting = process.env.TIMEOUT || 1 * HOURS;
+			        const alertintervalSetting = process.env.ALERT_INTERVAL || .25 * MINUTES;
+              areaReps.getRows({
+                offset: 1,
+                limit: 1000
+              }, (err, areaRepRows) => {
+                const accountConfig = rows.map(({ twitterurl , timeout = timeoutSetting , alertinterval = alertintervalSetting , arearep }) => {
+                    const accountName = twitterurl.replace('https://twitter.com/', '');
+                    const alertMention = areaRepRows.filter(({ discordhandle, mentionids }) => {
+                      return discordhandle.toLowerCase() === arearep.toLowerCase()
+                    })[0].mentionids;
+                    return {
+                      accountName,
+                      timeoutMS: parseInt(timeout, 10),
+                      alertIntervalMS: parseInt(alertinterval, 10),
+                      alertMention,
+                    };
+                });
+                resolve(accountConfig);
+              })
+
             });
           }
         })

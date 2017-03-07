@@ -24,7 +24,7 @@ const checkAccounts = () => {
       .then(() => {
         setTimeout(() => {
           checkAccounts();
-        }, 10000);
+        }, parseInt(process.env.ALERT_INTERVAL, 10) || 10000);
       })
   } else {
     setTimeout(() => {
